@@ -4,13 +4,14 @@ import (
 	"bms-go/global"
 	"flag"
 	"fmt"
+	"log"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
 func Viper(path ...string) *viper.Viper {
-	// 命令行参数
+	// 命令行参数 todo: 可优化
 	var config string
 	if len(path) > 1 {
 		flag.StringVar(&config, "c", "", "choose a config file")
@@ -42,5 +43,6 @@ func Viper(path ...string) *viper.Viper {
 		fmt.Println("Unmarshal config failed:", err)
 	}
 
+	log.Println("----- Viper init succeed -----")
 	return v
 }

@@ -2,6 +2,7 @@ system:
   addr: 127.0.0.1:7777
 
 zap:
+  release: dev
   level: debug
   format: console # 日志输出方式
   dir: log # 日志目录，todo: 分割日志

@@ -4,6 +4,8 @@ import (
 	"bms-go/global"
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -25,5 +27,6 @@ func InitGorm() *gorm.DB {
 	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
 
+	zap.L().Info("----- gorm init mysql succeed -----")
 	return db
 }
