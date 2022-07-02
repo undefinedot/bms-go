@@ -2,7 +2,9 @@ package initialize
 
 import (
 	"bms-go/global"
+	"bms-go/model"
 	"fmt"
+	"os"
 
 	"go.uber.org/zap"
 
@@ -29,4 +31,16 @@ func InitGorm() *gorm.DB {
 
 	zap.L().Info("----- gorm init mysql succeed -----")
 	return db
+}
+
+// RegisterTables 初始化数据表
+func RegisterTables(db *gorm.DB) {
+	err := db.AutoMigrate(
+		model.User{},
+	)
+	if err != nil {
+		zap.L().Error("initialize.RegisterTables 注册数据表失败", zap.Error(err))
+		os.Exit(1)
+	}
+	zap.L().Info("注册数据表成功！")
 }

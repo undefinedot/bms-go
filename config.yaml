@@ -21,3 +21,8 @@ redis:
   db: 0
   addr: 127.0.0.1:6379
   password: ""
+
+jwt:
+  secret_key: bms-2022 # 改为hash值
+  expire_time: 604800 # 7days
+  issuer: bms

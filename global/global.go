@@ -2,6 +2,7 @@ package global
 
 import (
 	"bms-go/config"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -16,3 +17,11 @@ var (
 	SYS_DB     *gorm.DB             // Mysql
 	SYS_ZAP    *zap.Logger          // Zap日志
 )
+
+// BaseModel 数据表常用的4个字段
+type BaseModel struct {
+	ID        uint `gorm:"primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}

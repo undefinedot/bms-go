@@ -1,17 +1,23 @@
 package initialize
 
 import (
-	system "bms-go/api/v1"
+	"bms-go/router"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Routers() *gin.Engine {
 	engine := gin.New()
+	publicGroup := engine.Group("")
+	// 无需鉴权API
+	router.RouterGroupApp.InitBaseRouter(publicGroup)
+
+	// 需要鉴权的API
+	privateRouter := engine.Group("")
+	// todo: Use middleware
 	{
-		// 无需鉴权API
-		engine.POST("/login", system.Login)     // 首页登录
-		engine.POST("/captcha", system.Captcha) // 登录时的验证码
+		// 用户
+		router.RouterGroupApp.UserRouter.InitUserRouter(privateRouter)
 	}
 
 	return engine

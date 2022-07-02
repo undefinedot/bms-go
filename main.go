@@ -18,6 +18,7 @@ func main() {
 	// 初始化数据库
 	global.SYS_DB = initialize.InitGorm()
 	if global.SYS_DB != nil {
+		initialize.RegisterTables(global.SYS_DB)
 		db, _ := global.SYS_DB.DB()
 		defer db.Close()
 	}
