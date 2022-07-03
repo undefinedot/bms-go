@@ -16,8 +16,10 @@ type User struct {
 	//AuthorityId string
 	//Authority   Authority
 	//Authorities []Authority
-	Phone string `json:"phone" gorm:"comment:手机号码"`
-	Email string `json:"email" gorm:"邮箱"`
+	Phone       string      `json:"phone" gorm:"comment:手机号码"`
+	Email       string      `json:"email" gorm:"邮箱"`
+	AuthorityID string      `gorm:"column:authority_id;default:888;comment:对应的角色id"`
+	Authorities []Authority `gorm:"many2many:user_authority"`
 }
 
 func (User) TableName() string {
