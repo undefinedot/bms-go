@@ -1,0 +1,28 @@
+system:
+  addr:
+
+zap:
+  release:
+  level: debug
+  format: # 日志输出方式
+  dir:  # 日志目录，todo: 分割日志
+  name: xxx.log
+
+mysql:
+  host:
+  post:
+  db_name:
+  username:
+  password:
+  max_idle_conns:
+  max_open_conns:
+
+redis:
+  db: 0
+  addr: 127.0.0.1:6379
+  password: ""
+
+jwt:
+  secret_key: # hash
+  expire_time: 604800 # 7days
+  issuer: bms
