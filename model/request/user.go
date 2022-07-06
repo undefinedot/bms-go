@@ -2,14 +2,15 @@ package request
 
 // Register 用户注册
 type Register struct {
-	NiceName   string `json:"nice_name" binding:"required"`
-	Username   string `json:"username" binding:"required"`
-	Password   string `json:"password" binding:"required"`
-	RePassword string `json:"re_password" binding:"eqfield=Password"`
-	HeaderImg  string `json:"header_img"`
-	Phone      string `json:"phone"`
-	Email      string
-	// 角色id
+	NiceName     string   `json:"nice_name" binding:"required"`
+	Username     string   `json:"username" binding:"required"`
+	Password     string   `json:"password" binding:"required"`
+	RePassword   string   `json:"re_password" binding:"eqfield=Password"`
+	HeaderImg    string   `json:"header_img"`
+	Phone        string   `json:"phone"`
+	Email        string   `json:"email"`
+	AuthorityId  string   `json:"authority_id"`
+	AuthorityIds []string `json:"authority_ids"`
 }
 
 // Login 用户登录
@@ -28,12 +29,10 @@ type ChangePwd struct {
 
 // ChangeUserInfo 修改用户信息
 type ChangeUserInfo struct {
-	ID        uint   `json:"-"`
-	NickName  string `json:"nick_name"`
-	HeaderImg string `json:"header_img"`
-	Phone     string `json:"phone"`
-	Email     string `json:"email"`
+	ID           uint     `json:"id" binding:"required"`
+	NickName     string   `json:"nick_name"`
+	HeaderImg    string   `json:"header_img"`
+	Phone        string   `json:"phone"`
+	Email        string   `json:"email"`
+	AuthorityIds []string `json:"authority_ids"`
 }
-
-// 用户所属的角色ID
-// 用户所属的角色ID, 同时设置多个

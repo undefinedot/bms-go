@@ -12,11 +12,11 @@ import (
 func GetClaims(c *gin.Context) (*reqModel.CustomClaims, error) {
 	token := c.Request.Header.Get("x-token")
 	j := NewJWT()
-	calims, err := j.ParseToken(token)
+	claims, err := j.ParseToken(token)
 	if err != nil {
 		zap.L().Error("ParseToken from gin.Context failed", zap.Error(err))
 	}
-	return calims, err
+	return claims, err
 }
 
 func GetUserID(c *gin.Context) uint {

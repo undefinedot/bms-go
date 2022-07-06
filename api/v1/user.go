@@ -8,6 +8,7 @@ import (
 	reqModel "bms-go/model/request"
 	resModel "bms-go/model/response"
 	"bms-go/utils"
+	"fmt"
 
 	"go.uber.org/zap"
 
@@ -45,13 +46,22 @@ func (b *BaseApi) Register(ctx *gin.Context) {
 		response.FailWithMsg(err.Error(), ctx)
 		return
 	}
+	// 处理角色id集合，string=>[]Authority
+	var authorities []model.Authority
+	for _, v := range r.AuthorityIds {
+		authorities = append(authorities, model.Authority{
+			AuthorityId: v,
+		})
+	}
 	user := &model.User{
-		Username:  r.Username,
-		NickName:  r.NiceName,
-		Password:  r.Password,
-		HeaderImg: r.HeaderImg,
-		Phone:     r.Phone,
-		Email:     r.Email,
+		Username:    r.Username,
+		NickName:    r.NiceName,
+		Password:    r.Password,
+		HeaderImg:   r.HeaderImg,
+		Phone:       r.Phone,
+		Email:       r.Email,
+		AuthorityID: r.AuthorityId,
+		Authorities: authorities,
 	}
 	userRet, err := userService.Register(user)
 	if err != nil {
@@ -60,7 +70,7 @@ func (b *BaseApi) Register(ctx *gin.Context) {
 		return
 	}
 	zap.L().Info("用户注册成功", zap.Uint("userID", userRet.ID))
-	response.OkWithDetail(resModel.UserRes{userRet}, "注册成功", ctx)
+	response.OkWithDetail(resModel.UserRes{User: userRet}, "注册成功", ctx)
 }
 
 // TokenNext 登录成功后签发jwt
@@ -110,6 +120,16 @@ func (b *BaseApi) SetUserInfo(ctx *gin.Context) {
 		response.FailWithMsg(err.Error(), ctx)
 		return
 	}
+	// 更新用户的角色列表
+	if len(user.AuthorityIds) != 0 {
+		err := userService.SetUserAuthorities(user.ID, user.AuthorityIds)
+		if err != nil {
+			zap.L().Error("SetUserAuthorities() failed", zap.Error(err))
+			response.FailWithMsg("设置用户信息失败！", ctx)
+			return
+		}
+	}
+	// 更新用户表
 	u := model.User{
 		BaseModel: global.BaseModel{ID: user.ID},
 		NickName:  user.NickName,
@@ -132,7 +152,7 @@ func (b *BaseApi) DeleteUser(ctx *gin.Context) {
 		return
 	}
 	// 禁止删除自己
-	jwtId := utils.GetUserID(ctx)
+	jwtId := utils.GetUserID(ctx) // todo: 带jwt测试删除用户
 	if jwtId == uint(reqId.ID) {
 		response.FailWithMsg("禁止删除自己", ctx)
 		return
@@ -148,13 +168,19 @@ func (b *BaseApi) DeleteUser(ctx *gin.Context) {
 
 // GetUserList 用户列表分页
 func (b *BaseApi) GetUserList(ctx *gin.Context) {
-	var pageInfo request.PageInfo
+	var pageInfo = request.PageInfo{
+		// 分页默认值,第一页page=1
+		Page:     1,
+		PageSize: 3,
+	}
 	if err := ctx.ShouldBindJSON(&pageInfo); err != nil {
+		fmt.Println(err)
 		response.FailWithMsg(err.Error(), ctx)
 		return
 	}
 	if list, total, err := userService.GetUserInfoList(pageInfo); err != nil {
 		zap.L().Error("分页获取失败", zap.Error(err))
+		response.FailWithMsg("分页获取用户列表失败!", ctx)
 		return
 	} else {
 		response.OkWithDetail(resModel.PageResult{

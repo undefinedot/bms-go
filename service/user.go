@@ -32,7 +32,7 @@ func (us *UserService) Register(u *model.User) (*model.User, error) {
 
 func (us *UserService) Login(u *model.User) (*model.User, error) {
 	var user model.User
-	err := global.SYS_DB.Where("username = ?", u.Username).First(&user).Error
+	err := global.SYS_DB.Where("username = ?", u.Username).Preload("Authorities").First(&user).Error
 	if err == nil {
 		// 验证密码
 		if ok := utils.CheckPassword(u.Password, user.Password); !ok {
@@ -61,9 +61,49 @@ func (us *UserService) SetUserInfo(u model.User) error {
 	return global.SYS_DB.Updates(&u).Error
 }
 
+func (us *UserService) SetUserAuthorities(uid uint, authorityIds []string) error {
+	tx := global.SYS_DB.Begin()
+	// 删除用户对应的旧的角色关系
+	err := tx.Delete(&model.UserAuthority{}, "user_id = ?", uid).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 插入新的角色关系
+	userAuthority := []model.UserAuthority{}
+	for _, v := range authorityIds {
+		userAuthority = append(userAuthority, model.UserAuthority{
+			UserID:      uid,
+			AuthorityID: v,
+		})
+	}
+	err = tx.Create(&userAuthority).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Where("id = ?", uid).First(&model.User{}).Update("authority_id", authorityIds[0]).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
 func (us *UserService) DeleteUser(uid int) error {
+	//var user model.User
+	//err := global.SYS_DB.Where("id = ?", uid).Delete(&user).Error
+	//if err != nil {
+	//	return err
+	//}
+	//// 删除中间表的相关信息
+	//err = global.SYS_DB.Where("user_id = ?", uid).Delete(&model.UserAuthority{}).Error
+	//return err
 	var user model.User
-	return global.SYS_DB.Where("id = ?", uid).Delete(&user).Error
+	// gorm关联删除，需要使用user表实例，所以先查出来再删。
+	err := global.SYS_DB.Where("id = ?", uid).First(&user).Select("Authorities").Delete(&user).Error
+	return err
 }
 
 func (us *UserService) GetUserInfoList(info request.PageInfo) (list interface{}, total int64, err error) {
@@ -75,13 +115,14 @@ func (us *UserService) GetUserInfoList(info request.PageInfo) (list interface{},
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Find(&userList).Error
+	// 预加载：用户的当前角色信息、用户的所有角色信息
+	err = db.Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
 	return userList, total, err
 }
 
 func (us *UserService) GetUserInfo(uuid uuid.UUID) (*model.User, error) {
 	var user model.User
-	err := global.SYS_DB.Where("uuid = ?", uuid).First(&user).Error
+	err := global.SYS_DB.Where("uuid = ?", uuid).Preload("Authorities").Preload("Authority").First(&user).Error
 	if err != nil {
 		return nil, err
 	}

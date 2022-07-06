@@ -58,7 +58,10 @@ func (a *AuthorityApi) DeleteAuthority(ctx *gin.Context) {
 
 // GetAuthorityList 分页获取角色列表
 func (a *AuthorityApi) GetAuthorityList(ctx *gin.Context) {
-	var pageInfo request.PageInfo
+	var pageInfo = request.PageInfo{
+		Page:     1,
+		PageSize: 5,
+	}
 	if err := ctx.ShouldBindJSON(&pageInfo); err != nil {
 		response.FailWithMsg(err.Error(), ctx)
 		return

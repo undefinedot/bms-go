@@ -19,7 +19,7 @@ func InitGorm() *gorm.DB {
 		DefaultStringSize:         191, // string字段的长度
 		SkipInitializeWithVersion: false,
 	}), &gorm.Config{
-		DisableForeignKeyConstraintWhenMigrating: true,
+		DisableForeignKeyConstraintWhenMigrating: true, // 禁用物理外键
 	})
 	if err != nil {
 		fmt.Println("初始化数据库失败：", err)
