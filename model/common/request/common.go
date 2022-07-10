@@ -2,7 +2,7 @@ package request
 
 // GetById 按id查找user
 type GetById struct {
-	ID int `json:"id"`
+	ID int `json:"id" binding:"required"`
 }
 
 // PageInfo 分页

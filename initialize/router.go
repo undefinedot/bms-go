@@ -20,6 +20,8 @@ func Routers() *gin.Engine {
 		router.RouterGroupApp.UserRouter.InitUserRouter(privateRouter)
 		// 角色
 		router.RouterGroupApp.AuthorityRouter.InitAuthorityRouter(privateRouter)
+		// 菜单
+		router.RouterGroupApp.MenuRouter.InitMenuRouter(privateRouter)
 	}
 
 	return engine

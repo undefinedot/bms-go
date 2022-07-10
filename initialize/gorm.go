@@ -38,6 +38,7 @@ func RegisterTables(db *gorm.DB) {
 	err := db.AutoMigrate(
 		model.User{},
 		model.Authority{},
+		model.BaseMenu{},
 	)
 	if err != nil {
 		zap.L().Error("initialize.RegisterTables 注册数据表失败", zap.Error(err))
