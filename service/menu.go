@@ -3,10 +3,27 @@ package service
 import (
 	"bms-go/global"
 	"bms-go/model"
+	"bms-go/model/common/request"
 	"strconv"
 )
 
 type MenuService struct{}
+
+// GetMenuAuthority 获取角色的关联菜单列表
+func (m *MenuService) GetMenuAuthority(info *request.GetAuthorityId) (menus []model.AuthorityMenu, err error) {
+	// 查询的是视图表authority_menu
+	err = global.SYS_DB.Where("authority_id = ?", info.AuthorityId).Order("sort").Find(&menus).Error
+	return
+}
+
+// AddMenuAuthority 增加 1角色->N菜单 的关联关系
+func (m *MenuService) AddMenuAuthority(menus []model.BaseMenu, authorityId string) error {
+	var auth model.Authority
+	auth.AuthorityId = authorityId
+	auth.BaseMenus = menus
+	err := AuthorityServiceApp.SetMenuAuthority(&auth)
+	return err
+}
 
 // GetInfoList 获取菜单列表，包括子菜单
 func (m *MenuService) GetInfoList() (list interface{}, total int64, err error) {

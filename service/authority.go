@@ -11,6 +11,8 @@ import (
 
 type AuthorityService struct{}
 
+var AuthorityServiceApp = new(AuthorityService)
+
 func (as *AuthorityService) CreateAuthority(auth model.Authority) (model.Authority, error) {
 	var authRet model.Authority
 	err := global.SYS_DB.Where("authority_id = ?", auth.AuthorityId).First(&authRet).Error
@@ -25,6 +27,7 @@ func (as *AuthorityService) UpdateAuthority(auth model.Authority) (model.Authori
 	err := global.SYS_DB.Updates(&auth).Error
 	return auth, err
 }
+
 func (as *AuthorityService) DeleteAuthority(auth model.Authority) error {
 	if errors.Is(global.SYS_DB.Preload("Users").First(&auth).Error, gorm.ErrRecordNotFound) {
 		return errors.New("角色不存在")
@@ -64,6 +67,14 @@ func (a *AuthorityService) GetAuthorityInfoList(pageInfo request.PageInfo) (list
 		}
 	}
 	return authorities, total, err
+}
+
+// SetMenuAuthority 更新角色对应的菜单列表
+func (a *AuthorityService) SetMenuAuthority(auth *model.Authority) error {
+	var au model.Authority
+	err := global.SYS_DB.Preload("BaseMenus").First(&au, "authority_id = ?", auth.AuthorityId).Error
+	err = global.SYS_DB.Model(&au).Association("BaseMenus").Replace(&auth.BaseMenus)
+	return err
 }
 
 // findChildrenAuthority 递归查出所有子角色

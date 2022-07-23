@@ -5,6 +5,7 @@ type AuthorityMenu struct {
 	BaseMenu
 	MenuId      string
 	AuthorityId string
+	Children    []AuthorityMenu
 }
 
 func (AuthorityMenu) TableName() string {

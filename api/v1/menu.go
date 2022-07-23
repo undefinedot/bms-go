@@ -4,6 +4,7 @@ import (
 	"bms-go/model"
 	"bms-go/model/common/request"
 	"bms-go/model/common/response"
+	reqModel "bms-go/model/request"
 	resModel "bms-go/model/response"
 
 	"github.com/gin-gonic/gin"
@@ -55,8 +56,6 @@ func (a *AuthorityMenuApi) UpdateBaseMenu(ctx *gin.Context) {
 	}
 }
 
-func (a *AuthorityMenuApi) AddMenuAuthority(ctx *gin.Context) {}
-
 func (a *AuthorityMenuApi) GetBaseMenuById(ctx *gin.Context) {
 	var menuInfo request.GetById
 	if err := ctx.ShouldBindJSON(&menuInfo); err != nil {
@@ -94,8 +93,38 @@ func (a *AuthorityMenuApi) GetMenuList(ctx *gin.Context) {
 	}
 }
 
-func (a *AuthorityMenuApi) GetMenuAuthority(ctx *gin.Context) {}
+// AddMenuAuthority 增加menu和角色的关联关系：角色1:N菜单
+func (a *AuthorityMenuApi) AddMenuAuthority(ctx *gin.Context) {
+	var authorityMenu reqModel.AddMenuAuthorityInfo
+	if err := ctx.ShouldBindJSON(&authorityMenu); err != nil {
+		response.FailWithMsg(err.Error(), ctx)
+		return
+	}
+	if err := menuService.AddMenuAuthority(authorityMenu.Menus, authorityMenu.AuthorityId); err != nil {
+		zap.L().Error("AddMenuAuthority() failed", zap.Error(err))
+		response.FailWithMsg("添加失败", ctx)
+	} else {
+		response.OkWithMsg("添加成功！", ctx)
+	}
+}
+
+// GetMenuAuthority 按角色id获取关联的菜单列表
+func (a *AuthorityMenuApi) GetMenuAuthority(ctx *gin.Context) {
+	var param request.GetAuthorityId
+	if err := ctx.ShouldBindJSON(&param); err != nil {
+		response.FailWithMsg(err.Error(), ctx)
+		return
+	}
+	if menus, err := menuService.GetMenuAuthority(&param); err != nil {
+		zap.L().Error("GetBaseMenuById() failed", zap.Error(err))
+		response.FailWithMsg("获取失败", ctx)
+	} else {
+		response.OkWithDetail(gin.H{"menus": menus}, "获取成功", ctx)
+	}
+}
 
 func (a *AuthorityMenuApi) GetMenu(ctx *gin.Context) {}
 
-func (a *AuthorityMenuApi) GetBaseMenuTree(ctx *gin.Context) {}
+func (a *AuthorityMenuApi) GetBaseMenuTree(ctx *gin.Context) {
+
+}
